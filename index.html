@@ -169,7 +169,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbz8GtYqFpfkuCnTzsfzmmxR9opbjBrh3yTbrhCmb-a7YyJyfnw0Uaa_7sghbse5mZ04wg/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxrgMYxbF2K2U943g-rW7Q7Fu363FuMajq9b6VvMuDZgpxZiPTCiliirEPKBbYIsbcXIQ/exec';
   let pedidos = [];
   let produtos = [];
   let modal;
@@ -267,48 +267,50 @@
     renderizarTabela(listaFiltrada);
   }
 
-  document.getElementById('pedidoForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const index = document.getElementById('index').value;
-    const pedido = {
-      'Nome': document.getElementById('usuario').value.trim(),
-      'ID Pedido': document.getElementById('idPedido').value.trim(),
-      'Local': document.getElementById('local').value,
-      'Data Pedido': document.getElementById('data').value,
-      'Prazo Entrega': document.getElementById('prazo').value,
-      'Quantidade': document.getElementById('quantidade').value,
-      'Produto': document.getElementById('produto').value,
-      'Status': document.getElementById('status').value,
-      'Prioridade': document.getElementById('prioridade').value,
-      'Observação': document.getElementById('observacao').value.trim(),
-    };
+document.getElementById('pedidoForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const index = document.getElementById('index').value;
+  const pedido = {
+    'Nome': document.getElementById('usuario').value.trim(),
+    'ID Pedido': document.getElementById('idPedido').value.trim(),
+    'Local': document.getElementById('local').value,
+    'Data Pedido': document.getElementById('data').value,
+    'Prazo Entrega': document.getElementById('prazo').value,
+    'Quantidade': document.getElementById('quantidade').value,
+    'Produto': document.getElementById('produto').value,
+    'Status': document.getElementById('status').value,
+    'Prioridade': document.getElementById('prioridade').value,
+    'Observação': document.getElementById('observacao').value.trim(),
+  };
 
-    try {
-      if (index === '') {
-        // Inserir novo
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(pedido),
-        });
-        if (!res.ok) throw new Error('Erro ao salvar pedido.');
-      } else {
-        // Atualizar
-        pedido.index = parseInt(index);
-        const res = await fetch(API_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(pedido),
-        });
-        if (!res.ok) throw new Error('Erro ao atualizar pedido.');
-      }
-      await carregarPedidos();
-      modal.hide();
-    } catch (err) {
-      alert(err.message);
-      console.error(err);
+  try {
+    let res;
+    if (index === '') {
+      // Inserir novo pedido
+      res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(pedido)
+      });
+    } else {
+      // Atualizar pedido
+      pedido.index = parseInt(index);
+      res = await fetch(API_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(pedido)
+      });
     }
-  });
+
+    if (!res.ok) throw new Error('Erro ao salvar pedido.');
+
+    await carregarPedidos();
+    modal.hide();
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+});
 
   function editarPedido(i) {
     const pedido = pedidos[i];
@@ -330,21 +332,20 @@
   }
 
   async function excluirPedido(i) {
-    if (!confirm('Deseja realmente excluir este pedido?')) return;
-    try {
-      const res = await fetch(API_URL, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idPedido: pedidos[i]['ID Pedido'] }),
-      });
-      if (!res.ok) throw new Error('Erro ao excluir pedido.');
-      await carregarPedidos();
-    } catch (err) {
-      alert(err.message);
-      console.error(err);
-    }
+  if (!confirm('Deseja realmente excluir este pedido?')) return;
+  try {
+    const res = await fetch(API_URL, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ idPedido: pedidos[i]['ID Pedido'] })
+    });
+    if (!res.ok) throw new Error('Erro ao excluir pedido.');
+    await carregarPedidos();
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
   }
-
+}
   let ordemAtual = { coluna: '', direcao: 'asc' };
   function ordenar(coluna) {
     if (ordemAtual.coluna === coluna) {
